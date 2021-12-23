@@ -174,7 +174,7 @@ const Cart = () => {
     const makeRequest = async () => {
       try {
           await axios.post("https://server-pro-noob.herokuapp.com/pro-noob-pages/checkout/payment", {
-            source: stripeToken.id,
+            source: stripeToken.card.id,
             amount: userTotal,
           })
           .then((res) => { console.log("Success: "+ res)})

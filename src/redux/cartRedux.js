@@ -19,7 +19,7 @@ const cartSlice = createSlice({
     deleteProduct: (state,action) => {
       state.quantity = action.payload.quantity > 0 ? state.quantity -= 1 : 0
       state.products = state.products.filter(item => item.id !== action.payload.id)
-      state.total = state.quantity === 0 ? 0 : state.total.toFixed(2)
+      state.total = state.quantity === 0 ? 0 : state.total
     },
     purchasedOrders:(state,action) => {
         state.purchasedOrders.push(action.payload)

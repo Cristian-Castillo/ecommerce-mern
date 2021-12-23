@@ -173,12 +173,13 @@ const Cart = () => {
   useEffect(() => {
     const makeRequest = async () => {
       try {
-          axios.post("http://localhost:5000/pro-noob-pages/checkout/payment", {
-            tokenId: stripeToken.id,
+          await axios.post("https://server-pro-noob.herokuapp.com/pro-noob-pages/checkout/payment", {
+            source: stripeToken.id,
             amount: userTotal,
-          });
-
-
+          })
+          .then((res) => { console.log("Success: "+ res)})
+          .catch(e => console.log(e))
+          
         history.push("/success")
 
       } catch(e){

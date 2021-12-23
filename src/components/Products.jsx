@@ -20,7 +20,7 @@ const Products = () => {
         const getProducts = async () => {
             
             try{
-                await axios.get("http://localhost:5000/pro-noob-pages/product/").then((res) => {
+                await axios.get("https://server-pro-noob.herokuapp.com/pro-noob-pages/product/").then((res) => {
                 console.log("Succesfully retrieved products.")
                 setProducts(res.data)
                 }).catch((e) => { console.log("Something went wrong. Could not retrieve products from Database.")})

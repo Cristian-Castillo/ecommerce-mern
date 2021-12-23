@@ -104,7 +104,7 @@ const Product = () => {
     const getProduct = async () => {
       try{
         
-        await axios.get(`http://localhost:5000/pro-noob-pages/product/find/${pathName}`)
+        await axios.get(`https://server-pro-noob.herokuapp.com/pro-noob-pages/product/find/${pathName}`)
         .then((res) => {
           console.log("Succesfully retrieved unique product")
           setProduct(res.data)

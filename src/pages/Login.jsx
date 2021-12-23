@@ -44,7 +44,7 @@ const Login = () => {
       e.preventDefault()
 
       try{
-          await axios.post("http://localhost:5000/pro-noob-pages/authenticate/login",{username, email, password})
+          await axios.post("https://server-pro-noob.herokuapp.com/pro-noob-pages/authenticate/login",{username, email, password})
           .then((res) => { 
               console.log(`Login Success, welcome Noob ${res.data.username}`);
               dispatch(login({username,email,token:res.data.accessToken}))

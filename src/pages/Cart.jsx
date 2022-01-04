@@ -1,14 +1,18 @@
-import { Add, Remove } from "@material-ui/icons";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
-import Announcement from "../components/Annoucement"
+import Announcement from "../components/Annoucement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { mobile } from "../responsive";
+import { useSelector,useDispatch } from "react-redux";
+import { FaTrash } from 'react-icons/fa';
+import { deleteProduct } from '../redux/cartRedux';
+import { useHistory } from "react-router-dom";
 import StripeCheckout from "react-stripe-checkout";
-import { useEffect, useState } from "react";
-import { useHistory } from "react-router";
+import { useEffect,useState } from 'react' 
 import axios from 'axios'
+import {
+  Link,
+} from "react-router-dom";
 
 const KEY = process.env.REACT_APP_STRIPE;
 
@@ -86,14 +90,6 @@ const ProductName = styled.span``;
 
 const ProductId = styled.span``;
 
-const ProductColor = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: ${(props) => props.color};
-`;
-
-const ProductSize = styled.span``;
 
 const PriceDetail = styled.div`
   flex: 1;
@@ -160,9 +156,15 @@ const Button = styled.button`
 `;
 
 const Cart = () => {
-  const cart = useSelector((state) => state.cart);
+
+
+  const myCart = useSelector(state => state.cart)
   const [stripeToken, setStripeToken] = useState(null);
   const history = useHistory();
+  const dispatch = useDispatch()
+  let userTotal = 0
+  myCart.products.forEach(item => userTotal += item.total)
+  userTotal = userTotal >= 50 ? userTotal-= 5 : userTotal
 
   const onToken = (token) => {
     setStripeToken(token);
@@ -171,17 +173,29 @@ const Cart = () => {
   useEffect(() => {
     const makeRequest = async () => {
       try {
-        const res =  await axios.post("https://server-pro-noob.herokuapp.com/pro-noob-pages/checkout/payment", {
+        const res = await axios.post("https://server-pro-noob.herokuapp.com/pro-noob-pages/checkout/payment", {
           tokenId: stripeToken.id,
           amount: 500,
         });
         history.push("/success", {
           stripeData: res.data,
-          products: cart, });
+          products: myCart, });
       } catch {}
     };
     stripeToken && makeRequest();
-  }, [stripeToken, cart.total, history, cart]);
+  }, [stripeToken, myCart.total, history, myCart]);
+
+
+  const handleDelete = (record) => {
+    dispatch(deleteProduct(record))
+    userTotal = 0
+    myCart.products.forEach(item => userTotal += item.total)
+    
+    if(userTotal >= 50){
+      userTotal -= 5
+    }
+  }
+
   return (
     <Container>
       <Navbar />
@@ -189,75 +203,78 @@ const Cart = () => {
       <Wrapper>
         <Title>YOUR BAG</Title>
         <Top>
-          <TopButton>CONTINUE SHOPPING</TopButton>
+          <Link to = "/product-list">
+            <TopButton>CONTINUE SHOPPING</TopButton>
+          </Link>
           <TopTexts>
-            <TopText>Shopping Bag(2)</TopText>
+            <TopText>Shopping Bag ({myCart.products.length})</TopText>
             <TopText>Your Wishlist (0)</TopText>
           </TopTexts>
-          <TopButton type="filled">CHECKOUT NOW</TopButton>
         </Top>
         <Bottom>
           <Info>
-            {cart.products.map((product) => (
-              <Product>
-                <ProductDetail>
-                  <Image src={product.img} />
-                  <Details>
-                    <ProductName>
-                      <b>Product:</b> {product.title}
-                    </ProductName>
-                    <ProductId>
-                      <b>ID:</b> {product._id}
-                    </ProductId>
-                    <ProductColor color={product.color} />
-                    <ProductSize>
-                      <b>Size:</b> {product.size}
-                    </ProductSize>
-                  </Details>
-                </ProductDetail>
-                <PriceDetail>
-                  <ProductAmountContainer>
-                    <Add />
-                    <ProductAmount>{product.quantity}</ProductAmount>
-                    <Remove />
-                  </ProductAmountContainer>
-                  <ProductPrice>
-                    $ {product.price * product.quantity}
-                  </ProductPrice>
-                </PriceDetail>
-              </Product>
-            ))}
+            {myCart.products.map((item) => 
+              <div key = {item.id}>
+              <Product >
+              <ProductDetail>
+                <Image src={item.img} />
+                <Details>
+                  <ProductName>
+                    <b>Product:</b> {item.product}
+                  </ProductName>
+                  <ProductId>
+                    <b>ID:</b> {item.id}
+                  </ProductId>
+                </Details>
+              </ProductDetail>
+              <PriceDetail>
+                <ProductAmountContainer>
+               
+                  <ProductAmount>{item.quantity} x</ProductAmount>
+                
+                  <FaTrash  
+                    onClick = {() => handleDelete({id:item.id,quantity:item.quantity,total:item.total})}
+                    style = {{cursor:"pointer",marginLeft:"20px"}}
+                    />
+                </ProductAmountContainer>
+                <ProductPrice>$ {item.total.toFixed(2)}</ProductPrice>
+              </PriceDetail>
+            </Product>
             <Hr />
+            </div>)}
           </Info>
           <Summary>
             <SummaryTitle>ORDER SUMMARY</SummaryTitle>
             <SummaryItem>
               <SummaryItemText>Subtotal</SummaryItemText>
-              <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
+              <SummaryItemPrice>$ {userTotal.toFixed(2)}</SummaryItemPrice>
             </SummaryItem>
             <SummaryItem>
               <SummaryItemText>Estimated Shipping</SummaryItemText>
-              <SummaryItemPrice>$ 5.90</SummaryItemPrice>
+              <SummaryItemPrice>$ 5.00</SummaryItemPrice>
             </SummaryItem>
             <SummaryItem>
-              <SummaryItemText>Shipping Discount</SummaryItemText>
-              <SummaryItemPrice>$ -5.90</SummaryItemPrice>
+              <SummaryItemText>Sepcial Discount</SummaryItemText>
+              <SummaryItemPrice style = {{color:'red'}}>$ {userTotal.toFixed(2)  >= 50 ? '-5.00': '0'} </SummaryItemPrice>
             </SummaryItem>
             <SummaryItem type="total">
               <SummaryItemText>Total</SummaryItemText>
-              <SummaryItemPrice>$ {cart.total}</SummaryItemPrice>
+              <SummaryItemPrice>$ {userTotal.toFixed(2)}</SummaryItemPrice>
             </SummaryItem>
             <StripeCheckout
-              name="PRO NOOB"
-              image="https://avatars.githubusercontent.com/u/1486366?v=4"
+              name="PRO NOOBZ"
+              image="https://image.shutterstock.com/image-vector/minimalist-pro-logo-vector-on-260nw-1270719463.jpg"
               billingAddress
               shippingAddress
-              description={`Your total is $${cart.total}`}
-              amount={cart.total * 100}
+              description={`Your total is $${userTotal.toFixed(2)}`}
+              amount={userTotal*100}
               token={onToken}
               stripeKey={KEY}
             >
-              <Button>CHECKOUT NOW</Button>
+              {myCart.products.length === 0 
+                ? <Button style={{backgroundColor:"gray"}}disabled>CHECKOUT NOW</Button>
+                :<Button style = {{cursor:"pointer"}}>CHECKOUT NOW</Button>
+              }
             </StripeCheckout>
           </Summary>
         </Bottom>

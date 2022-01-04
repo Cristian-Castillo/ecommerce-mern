@@ -84,7 +84,6 @@ const Button = styled.button`
 const Success = () => {
     const user = useSelector(state => state.user)
     const myCart = useSelector(state => state.cart)
-    console.log(myCart.products)
 
     return (
         <Container>

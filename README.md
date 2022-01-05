@@ -1,2 +1,2 @@
 # Ecommerce MERN App
-Visit the site: ecommerce-app-pro-noob.netlify.app/
+Visit the site: https://ecommerce-app-pro-noob.netlify.app/
